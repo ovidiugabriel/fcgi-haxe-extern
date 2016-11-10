@@ -1,0 +1,5 @@
+-main cpp.Server
+-D HXFCGI
+-D HXCPP_STACK_TRACE
+-D HXCPP_STACK_LINE
+-cpp ../Server
