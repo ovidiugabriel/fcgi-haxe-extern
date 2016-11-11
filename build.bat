@@ -2,6 +2,9 @@
 :: Tested in cygwin also
 :: rem set PATH=%PATH%;C:\HaxeToolkit\neko
 
+set HXCPP_MINGW=1
+set MINGW_ROOT=C:\Qt\Tools\mingw530_32
+
 IF EXIST Server\src\cpp GOTO ALREADYEXISTS
 mkdir Server\src\cpp
 :ALREADYEXISTS
