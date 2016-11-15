@@ -67,8 +67,8 @@ using namespace std;
 // USER DEFINED INCLUDES
 //
 
-#include "../../../cpp/WebFunctions.cpp"
-#include "../../../cpp/Request.h"
+#include "WebFunctions.cpp"
+#include "Request.h"
 
 //
 // PUBLIC CLASS (PART OF THE INTERFACE WITH HAXE)

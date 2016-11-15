@@ -46,7 +46,12 @@ package cpp;
 /**
     The cpp.Web class must implement the same interface as php.Web or neko.Web
  **/
-@:include('Web.h')
+@:buildXml("
+    <files id='__lib__'>
+        <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp'/>
+     </files>
+")
+@:headerCode('#include "Web.h"')
 @:native('Web')
 @:structAccess
 @:unreflective

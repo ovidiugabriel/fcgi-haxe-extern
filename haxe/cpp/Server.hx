@@ -46,6 +46,13 @@ package cpp;
 import haxe.remoting.Context;
 import haxe.remoting.HttpConnection;
 
+
+@:buildXml("
+    <files id='haxe'>
+        <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp'/>
+     </files>
+")
+@:headerCode('#include "Web.h"')
 class Server {
     /**
 

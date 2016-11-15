@@ -2,4 +2,5 @@
 -D HXFCGI
 -D HXCPP_STACK_TRACE
 -D HXCPP_STACK_LINE
+-D static_link
 -cpp ../Server
