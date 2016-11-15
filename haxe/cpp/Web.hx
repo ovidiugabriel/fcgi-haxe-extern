@@ -51,7 +51,7 @@ package cpp;
         <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp'/>
      </files>
 ")
-@:headerCode('#include "Web.h"')
+@:include('Web.h')
 @:native('Web')
 @:structAccess
 @:unreflective
