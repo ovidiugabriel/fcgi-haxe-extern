@@ -48,7 +48,7 @@ package cpp;
  **/
 @:buildXml("
     <files id='__lib__'>
-        <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp'/>
+        <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp' />
      </files>
 ")
 @:include('Web.h')

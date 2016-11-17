@@ -49,7 +49,7 @@ import cpp.Web;
 
 @:buildXml("
     <files id='haxe'>
-        <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp'/>
+        <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp' />
      </files>
 ")
 class Server {
@@ -85,4 +85,6 @@ class Server {
 
         handleRequest(ctx);
     }
+
+
 }
