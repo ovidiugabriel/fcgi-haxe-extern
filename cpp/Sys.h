@@ -6,6 +6,7 @@
 #define SYS_H
 
 #include <cstdio>
+#include <cstdlib>
 
 class Sys_obj {
 public:
