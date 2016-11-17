@@ -10,3 +10,7 @@ set MINGW_ROOT=C:\Qt\Tools\mingw530_32
 cd haxe
 haxe build.hxml
 cd ..
+
+for /f %%i in ('bash -c "ls -1 test | grep build"') do set BUILD_FOLDER=%%i
+copy test\%BUILD_FOLDER%\debug\Server.exe c:\xampp\cgi-bin
+
