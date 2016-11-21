@@ -73,6 +73,7 @@ class Server {
         Sys.print("Access-Control-Allow-Origin: *\r\n");
         Sys.print("Access-Control-Allow-Headers: x-haxe-remoting\r\n");
         Sys.print("Content-Type: text/html\r\n");
+        Sys.print("X-Powered-By: fcgi-haxe-extern https://github.com/ovidiugabriel/fcgi-haxe-extern\r\n");
         Sys.print("\r\n");
 
         var pathInfo = Sys.getEnv("PATH_INFO");
