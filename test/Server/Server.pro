@@ -1,7 +1,7 @@
 QT += core
 QT -= gui
 
-CONFIG += c++11
+CONFIG += c++11 debug
 
 TARGET = Server
 CONFIG += console

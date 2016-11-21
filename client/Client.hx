@@ -1,7 +1,7 @@
 
 /* ************************************************************************* */
 /*                                                                           */
-/*  Title:       Server.hx                                                   */
+/*  Title:       Client.hx                                                   */
 /*                                                                           */
 /*  Created on:  20.08.2016 at 02:52                                         */
 /*  Email:       ovidiugabriel@gmail.com                                     */
@@ -41,64 +41,31 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package cpp;
+import haxe.remoting.HttpAsyncConnection;
 
-import haxe.remoting.Context;
-import haxe.remoting.HttpConnection;
-import cpp.Web;
+class Client {
+    static var URL:String = "http://localhost/cgi-bin/Server.exe";
 
-// If Dialog is not imported, Type.createInstance() will return null
-import Dialog;
-
-@:buildXml("
-    <files id='haxe'>
-        <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp' />
-     </files>
-")
-class Server {
-    /**
-
-     **/
-    public static function handleRequest( ctx : Context ) : Bool {
-        var v = Web.getParams().get("__x");
-        if (v == null) {
-            return false;
-        }
-        Sys.print(HttpConnection.processRequest(StringTools.urlDecode(v), ctx));
-        return true;
+    static function display(v) {
+        trace(v);
     }
 
-    /**
+    static function getConnection( className : String ) : HttpAsyncConnection {
+        var cnx = HttpAsyncConnection.urlConnect(URL + '/' + className);
+        cnx.setErrorHandler( function(err) {
+            var errstr =  Std.string(err);
+            untyped __js__( "console.error('Error : ' + errstr)" );
+        } );
+        return cnx;
+    }
 
-     **/
-    static public function main() {
+    static function call( className : String, methodName : String,
+        params : Array<Dynamic>, ?onResult : Dynamic -> Void )
+    {
+        getConnection(className).resolve(className).resolve(methodName).call(params, onResult);
+    }
 
-        var pathInfo = Sys.getEnv("PATH_INFO");
-
-        if (pathInfo.charAt(0) == '/') {
-            pathInfo = pathInfo.substr(1);
-        }
-
-        var instance = Type.createInstance(Type.resolveClass(pathInfo), []);
-        if (null != instance) {
-
-            // Manually setting a CGI header for the response
-            Sys.print("Access-Control-Allow-Origin: *\r\n");
-            Sys.print("Access-Control-Allow-Headers: x-haxe-remoting\r\n");
-            Sys.print("X-Powered-By: fcgi-haxe-extern https://github.com/ovidiugabriel/fcgi-haxe-extern\r\n");
-            Sys.print("Content-Type: text/html\r\n");
-            Sys.print("\r\n");
-
-            var ctx = new haxe.remoting.Context();
-            ctx.addObject(pathInfo, instance);
-
-            handleRequest(ctx);
-        } else {
-            // TODO: Log error
-
-            // FastCGI is using 'Status: 404 Not Found' instead of 'HTTP/1.0 404 Not Found' that you may know from PHP
-            Sys.print("Status: 404 Not found\r\n");
-            Sys.print("\r\n");
-        }
+    static function main() {
+        call('Dialog', 'foo', [cast(1, Float), cast(2, Float)], display);
     }
 }
