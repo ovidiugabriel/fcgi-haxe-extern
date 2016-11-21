@@ -46,10 +46,9 @@ import haxe.remoting.HttpAsyncConnection;
 class Client {
     static var URL:String = "http://localhost/cgi-bin/Server.exe";
 
-    static function display(v) {
-        trace(v);
-    }
-
+    /**
+        Gets the context for a HTTP connection to execute remote calls.
+     **/
     static function getConnection( className : String ) : HttpAsyncConnection {
         var cnx = HttpAsyncConnection.urlConnect(URL + '/' + className);
         cnx.setErrorHandler( function(err) {
@@ -59,13 +58,16 @@ class Client {
         return cnx;
     }
 
-    static function call( className : String, methodName : String,
+    /**
+         Remotely calls a procedure on the server and executes callback on result.
+     **/
+    static public function call( className : String, methodName : String,
         params : Array<Dynamic>, ?onResult : Dynamic -> Void )
     {
         getConnection(className).resolve(className).resolve(methodName).call(params, onResult);
     }
 
     static function main() {
-        call('Dialog', 'foo', [cast(1, Float), cast(2, Float)], display);
+        Dialog.foo(1, 2);
     }
 }

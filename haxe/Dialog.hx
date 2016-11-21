@@ -1,8 +1,8 @@
 
 class Dialog {
-    public function new() {}
+    // public function new() {}
 
-    public function foo( x : Float, y : Float ) : Float {
+    static public function foo( x : Float, y : Float ) : Float {
         return x + y;
     }
 }
