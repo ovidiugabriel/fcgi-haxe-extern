@@ -12,7 +12,7 @@
 /* ************************************************************************* */
 
 /*
- * Copyright (c) 2015, ICE Control srl.
+ * Copyright (c) 2015-2016, ICE Control srl.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -48,6 +48,7 @@ import haxe.remoting.HttpConnection;
 import cpp.Web;
 
 // If Dialog is not imported, Type.createInstance() will return null
+// FIXME: Find a method to require dependencies in a custom project specific file.
 import Dialog;
 
 @:buildXml("
@@ -73,12 +74,21 @@ class Server {
      **/
     static public function main() {
 
-        var pathInfo = Sys.getEnv("PATH_INFO");
+        var pathInfo:String = Sys.getEnv("PATH_INFO");
+
+        if (pathInfo.charAt(0) == '"') {
+            Sys.print("ERROR: Don't use quotes on Windows.\n");
+            return;
+        }
 
         if (pathInfo.charAt(0) == '/') {
             pathInfo = pathInfo.substr(1);
         }
 
+        //
+        // The method to be executed is required to be an instance method
+        // (as oposed to a static method which belogs to class, not to instance)
+        //
         var instance = Type.createInstance(Type.resolveClass(pathInfo), []);
         if (null != instance) {
 
