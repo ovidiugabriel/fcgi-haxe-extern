@@ -34,7 +34,11 @@ cd client
 call build.bat
 cd ..
 
-for /f %%i in ('bash -c "cygpath -w `realpath client/test.html `"') do set TEST_HTML=%%i
+:: for /f %%i in ('bash -c "cygpath -w `realpath client/test.html `"') do set TEST_HTML=%%i
+
+cp client/test.html c:\xampp\htdocs
+mkdir c:\xampp\htdocs\js
+cp client/js/Client.js c:\xampp\htdocs\js
 
 set FIREFOX="C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
-%FIREFOX% %TEST_HTML%
+%FIREFOX% http://localhost/test.html

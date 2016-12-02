@@ -11,7 +11,11 @@
 class Sys_obj {
 public:
     static int print(const char* v) {
-        printf("%s", v);
+        return printf("%s", v);
+    }
+
+    static int print(Float& v) {
+        return printf("%f", v);
     }
 
     static String getEnv(const char* s) {
