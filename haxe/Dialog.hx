@@ -14,9 +14,6 @@ class Dialog {
 
     public function div( x : Float, y : Float ) : Float {
         untyped __cpp__('Result<double> result = TDialog::div(x, y)');
-        if (untyped __cpp__('result.isException()')) {
-            throw untyped __cpp__('result.getMessage()');
-        }
-        return untyped __cpp__('result.getResult()');
+        return CatchException.getResult();
     }
 }

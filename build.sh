@@ -5,13 +5,12 @@
 # :: Tested in cygwin also
 #
 
+set -o verbose
+
 PATH=$(printf "%q" "$PATH")
 export FCGI_HAXE_EXTERN_PATH=`cygpath -w $PWD`
 export HXCPP_MINGW=1
 export MINGW_ROOT="/cygdrive/c/Qt/Tools/mingw530_32"
-# QMAKE=/cygdrive/c/Qt/5.7/mingw53_32/bin/qmake.exe
-
-set -o verbose
 
 # Cleanup old server files
 rm -rf Server
@@ -47,3 +46,7 @@ if [ ! -d $JSDIR ] ; then
     mkdir $JSDIR
 fi
 cp ./client/js/Client.js $JSDIR
+
+
+# -D HXCPP_STACK_TRACE
+# -D HXCPP_STACK_LINE
