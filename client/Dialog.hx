@@ -4,8 +4,8 @@ class Dialog {
         trace(v);
     }
 
-    static public function foo( x : Float, y : Float ) : Void {
-        Client.call('Dialog', 'foo', [x, y], display);
+    static public function div( x : Float, y : Float ) : Void {
+        Client.call('Dialog', 'div', [x, y], display);
     }
 
 }

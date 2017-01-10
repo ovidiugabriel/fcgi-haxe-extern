@@ -3,11 +3,20 @@
 /**
  * Recommended presentation: https://www.youtube.com/watch?v=k2rw7-uL6RU
  */
+@:buildXml("
+    <files id='haxe'>
+        <compilerflag value='-std=c++11' />
+     </files>
+")
 @:headerCode('#include "TDialog.h"')
 class Dialog {
     public function new() {}
 
-    public function foo( x : Float, y : Float ) : Float {
-        return untyped __cpp__('TDialog::foo(x, y)');
+    public function div( x : Float, y : Float ) : Float {
+        untyped __cpp__('Result<double> result = TDialog::div(x, y)');
+        if (untyped __cpp__('result.isException()')) {
+            throw untyped __cpp__('result.getMessage()');
+        }
+        return untyped __cpp__('result.getResult()');
     }
 }
