@@ -37,9 +37,10 @@ $SERVER
 
 # Building client project
 pushd client
-haxe -main Client -js js/Client.js
+haxe -main Client -debug -js js/Client.js
 popd
 
+#  Copying client JavaScript files
 cp  ./client/test.html /cygdrive/c/xampp/htdocs
 JSDIR="/cygdrive/c/xampp/htdocs/js"
 if [ ! -d $JSDIR ] ; then
@@ -47,6 +48,6 @@ if [ ! -d $JSDIR ] ; then
 fi
 cp ./client/js/Client.js $JSDIR
 
-
-# -D HXCPP_STACK_TRACE
-# -D HXCPP_STACK_LINE
+# Running client test in browser
+FIREFOX="/cygdrive/c/Program\ Files\ \(x86\)/Mozilla\ Firefox/firefox.exe"
+$FIREFOX http://localhost/test.html

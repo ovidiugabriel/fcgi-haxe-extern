@@ -69,5 +69,6 @@ class Client {
 
     static function main() {
         Dialog.div(1, 2);
+        Dialog.div(1, 0);
     }
 }
