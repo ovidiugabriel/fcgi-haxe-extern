@@ -60,23 +60,30 @@ static int GetPostLength()
 
 static string GetPostData()
 {
+    static char* c = NULL;
     TRACE( __FUNCTION__ );
+
     int length = GetPostLength();
     if (length == 0) { // POST data is empty
         return "";
     }
     if (length > 262144) {length = 262144;}
-    string ctype(getenv("CONTENT_TYPE"));
 
-    char* c = new char[length];
-    char ch;
-    for (int i = 0; i <= length; i++) {
-        ch = fgetc(stdin);
-        if (ch == EOF) break;
-        c[i] = ch;
+    if (NULL == c) {
+
+        c = new char[length + 1];
+
+        memset(c, 0, sizeof(c));
+        char ch;
+        for (int i = 0; i < length; i++) {
+            ch = fgetc(stdin);
+            if (ch == EOF) {
+                break;
+            }
+            c[i] = ch;
+        }
     }
-    string data(c,length);
-    delete[] c;
+    std::string data(c, length);
 
     return data;
 }

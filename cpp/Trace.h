@@ -12,4 +12,10 @@
     #define TRACE(...)
 #endif
 
+static void logMessage(std::string message) {
+    std::ofstream outfile;
+    outfile.open("./haxe.log", std::ios_base::app);
+    outfile << message << std::endl;
+}
+
 #endif

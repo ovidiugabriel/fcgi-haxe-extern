@@ -56,6 +56,7 @@
 #include <sstream>
 
 #include <haxe/ds/StringMap.h>
+#include <fstream>
 
 //
 // USING NAMESPACES AND IMPORTED TYPES

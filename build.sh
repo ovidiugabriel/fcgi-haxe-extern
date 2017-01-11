@@ -1,19 +1,19 @@
-#!/bin/bash
+#!/bin/bash -x
 
 #
 # :: Need to have MSVC installed and run this script from command line
 # :: Tested in cygwin also
 #
 
-set -o verbose
-
-PATH=$(printf "%q" "$PATH")
+# PATH=$(printf "%q" "$PATH")
 export FCGI_HAXE_EXTERN_PATH=`cygpath -w $PWD`
 export HXCPP_MINGW=1
 export MINGW_ROOT="/cygdrive/c/Qt/Tools/mingw530_32"
 
 # Cleanup old server files
-rm -rf Server
+if [ "1" == "$CLEAN" ] ; then
+    rm -rf Server
+fi
 
 cd haxe
 haxe build.hxml
@@ -27,9 +27,17 @@ mingw32-make
 popd
 
 # :: copy the executable to the cgi-bin folder
-rm /cygdrive/c/xampp/cgi-bin/Server.exe
+SERVER_EXE="/cygdrive/c/xampp/cgi-bin/Server.exe"
+if [ -e $SERVER_EXE ] ; then
+    rm $SERVER_EXE
+fi
 SERVER="./test/Server/debug/Server.exe"
-cp $SERVER /cygdrive/c/xampp/cgi-bin
+if [ -e $SERVER ] ; then
+    cp $SERVER /cygdrive/c/xampp/cgi-bin
+else
+    echo "Server $SERVER not built"
+    exit 1
+fi
 
 # :: simply execute the binary in the console to check for the output
 export PATH_INFO="/Dialog"
@@ -40,8 +48,13 @@ pushd client
 haxe -main Client -debug -js js/Client.js
 popd
 
+# "//# sourceMappingURL=http://example.com/path/to/your/sourcemap.map"
+
 #  Copying client JavaScript files
-cp  ./client/test.html /cygdrive/c/xampp/htdocs
+HTDOCS="/cygdrive/c/xampp/htdocs"
+cp ./client/test.html $HTDOCS
+cp ./client/.htaccess $HTDOCS
+
 JSDIR="/cygdrive/c/xampp/htdocs/js"
 if [ ! -d $JSDIR ] ; then
     mkdir $JSDIR
@@ -49,5 +62,5 @@ fi
 cp ./client/js/Client.js $JSDIR
 
 # Running client test in browser
-FIREFOX="/cygdrive/c/Program\ Files\ \(x86\)/Mozilla\ Firefox/firefox.exe"
-$FIREFOX http://localhost/test.html
+firefox http://localhost/test.html
+

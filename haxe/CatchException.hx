@@ -9,7 +9,7 @@ class CatchException {
     @:extern
     public static inline function getResult() {
         if (untyped __cpp__('result.isException()')) {
-            throw untyped __cpp__('result.getMessage()');
+            throw cast(untyped __cpp__('result.getMessage()'), String);
         }
         return untyped __cpp__('result.getResult()');
     }

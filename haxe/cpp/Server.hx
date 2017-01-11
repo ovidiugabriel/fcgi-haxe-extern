@@ -46,6 +46,7 @@ package cpp;
 import haxe.remoting.Context;
 import haxe.remoting.HttpConnection;
 import cpp.Web;
+import sys.io.FileOutput;
 
 // If Dialog is not imported, Type.createInstance() will return null
 // FIXME: Find a method to require dependencies in a custom project specific file.
@@ -56,12 +57,13 @@ import Dialog;
         <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp' />
      </files>
 ")
+@:headerCode('#include <fstream>')
 class Server {
     /**
 
      **/
     public static function handleRequest( ctx : Context ) : Bool {
-        var v = Web.getParams().get("__x");
+        var v:String = Web.getParams().get("__x");
         if (v == null) {
             return false;
         }
@@ -69,20 +71,57 @@ class Server {
         return true;
     }
 
-    /**
-
-     **/
-    static public function main() {
-
+    public static function getPathInfo() : String {
         var pathInfo:String = Sys.getEnv("PATH_INFO");
 
         if (pathInfo.charAt(0) == '"') {
-            Sys.print("ERROR: Don't use quotes on Windows.\n");
-            return;
+            logMessage("ERROR: Don't use quotes on Windows.\n");
+            return null;
         }
 
         if (pathInfo.charAt(0) == '/') {
             pathInfo = pathInfo.substr(1);
+        }
+        return pathInfo;
+    }
+
+    public static function getClassName() : String {
+        var v:String = Web.getParams().get("__x");
+        if (null == v) {
+            return null;
+        }
+        var u = new haxe.Unserializer(StringTools.urlDecode(v));
+        var path = u.unserialize();
+        return path[0];
+    }
+
+    static private function notFound(?isFinal:Bool) {
+        //
+        // FastCGI is using 'Status: 404 Not Found' instead of 'HTTP/1.0 404 Not Found'
+        // that you may know from PHP
+        //
+        Sys.print("Status: 404 Not found\r\n");
+        if (isFinal) {
+            Sys.print("\r\n");
+        }
+    }
+
+    static public function logMessage(message:String) {
+        untyped __cpp__('std::ofstream outfile');
+        untyped __cpp__('outfile.open("./haxe.log", std::ios_base::app)');
+        untyped __cpp__('outfile << message << std::endl');
+    }
+
+    /**
+
+     **/
+    static public function main() {
+        var pathInfo:String = getClassName();
+
+        if (null == pathInfo) {
+	    logMessage("ERROR: Invalid request. No class name specified.");
+            Server.notFound(true);
+            return;
         }
 
         //
@@ -97,6 +136,9 @@ class Server {
             Sys.print("Access-Control-Allow-Headers: x-haxe-remoting\r\n");
             Sys.print("X-Powered-By: fcgi-haxe-extern https://github.com/ovidiugabriel/fcgi-haxe-extern\r\n");
             Sys.print("Content-Type: text/html\r\n");
+            Sys.print("Cache-Control: no-cache, no-store, must-revalidate\r\n");
+            Sys.print("Pragma: no-cache\r\n");
+            Sys.print("Expires: 0\r\n");
             Sys.print("\r\n");
 
             var ctx = new haxe.remoting.Context();
@@ -104,11 +146,8 @@ class Server {
 
             handleRequest(ctx);
         } else {
-            // TODO: Log error
-
-            // FastCGI is using 'Status: 404 Not Found' instead of 'HTTP/1.0 404 Not Found' that you may know from PHP
-            Sys.print("Status: 404 Not found\r\n");
-            Sys.print("\r\n");
+            logMessage('ERROR: instance for $pathInfo is null');
+            Server.notFound(true);
         }
     }
 }
