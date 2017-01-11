@@ -62,8 +62,6 @@
 // USING NAMESPACES AND IMPORTED TYPES
 //
 
-using namespace std;
-
 //
 // USER DEFINED INCLUDES
 //
@@ -83,11 +81,11 @@ public:
 
         Request request;
 
-        string base = GetCompleteQueryString( request.getPostData(), GetParamsString() );
-        string part, key, value;
+        std::string base = GetCompleteQueryString( request.getPostData(), GetParamsString() );
+        std::string part, key, value;
         std::string::size_type ppos = base.find("&");
 
-        while (ppos != string::npos) {
+        while (ppos != std::string::npos) {
             part = base.substr(0, ppos);
             key = ParseKey(part);
             if (!key.empty()) {

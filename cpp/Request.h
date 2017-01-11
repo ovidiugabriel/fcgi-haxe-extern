@@ -46,12 +46,12 @@
 
 //
 // LOCAL CLASS (DOES NOT NEED TO BE EXPORTED)
-// 
+//
 
 class Request {
     bool post_fetched;
     bool header_sent;
-    string postData;
+    std::string postData;
 public:
     Request()
     {
@@ -61,13 +61,13 @@ public:
         postData = "";
     }
 
-    string getPostData()
+    std::string getPostData()
     {
         TRACE( __FUNCTION__ );
         if (!post_fetched) {
             postData = ::GetPostData();
             post_fetched = true;
-        }       
+        }
         return postData;
     }
 };

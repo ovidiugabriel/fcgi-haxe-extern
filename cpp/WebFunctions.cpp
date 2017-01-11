@@ -51,20 +51,20 @@ static int GetPostLength()
     if (clen == NULL) {
         return ret;
     } else {
-        string slen(clen);
-        stringstream stream(slen);
+        std::string slen(clen);
+        std::stringstream stream(slen);
         stream >> ret;
         return ret;
     }
 }
 
-static string GetPostData()
+static std::string GetPostData()
 {
     static char* c = NULL;
     TRACE( __FUNCTION__ );
 
     int length = GetPostLength();
-    if (length == 0) { // POST data is empty
+    if (length == 0) {              // POST data is empty
         return "";
     }
     if (length > 262144) {length = 262144;}
@@ -88,17 +88,17 @@ static string GetPostData()
     return data;
 }
 
-static string GetParamsString()
+static std::string GetParamsString()
 {
     TRACE( __FUNCTION__ );
     const char *s = getenv("QUERY_STRING");
-    return (s != NULL) ? string(s) : string("");
+    return (s != NULL) ? std::string(s) : std::string("");
 }
 
-static string GetCompleteQueryString(string post, string get)
+static std::string GetCompleteQueryString(std::string post, std::string get)
 {
     TRACE( __FUNCTION__ );
-    string base = "";
+    std::string base = "";
     if (post.length() != 0) {
         base.append(post);
     }
@@ -111,21 +111,21 @@ static string GetCompleteQueryString(string post, string get)
     return base;
 }
 
-static string ParseKey(string data)
+static std::string ParseKey(std::string data)
 {
     TRACE( __FUNCTION__ );
     std::string::size_type pos = data.find("=");
-    if (pos != string::npos) {
+    if (pos != std::string::npos) {
         return data.substr(0,pos);
     }
     return data;
 }
 
-static string ParseValue(string data)
+static std::string ParseValue(std::string data)
 {
     TRACE( __FUNCTION__ );
     std::string::size_type pos = data.find("=");
-    if (pos != string::npos) {
+    if (pos != std::string::npos) {
         return data.substr(pos+1);
     }
     return "";
