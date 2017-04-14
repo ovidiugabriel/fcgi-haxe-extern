@@ -1,4 +1,8 @@
 
+package cpp;
+
+// This class is C++ specific
+
 class CatchException {
     /**
         Acts as a simple C++ macro to return the result or throw an exception message.
