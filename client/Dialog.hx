@@ -4,8 +4,12 @@ class Dialog {
         trace(v);
     }
 
+    static function onError(errstr) {
+    	trace('ERROR: $errstr');
+    }
+
     static public function div( x : Float, y : Float ) : Void {
-        Client.call('Dialog', 'div', [x, y], display);
+        Client.call('Dialog', 'div', [x, y], display, onError);
     }
 
 }

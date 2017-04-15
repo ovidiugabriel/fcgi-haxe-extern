@@ -46,15 +46,27 @@ import haxe.remoting.HttpAsyncConnection;
 class Client {
     static var URL:String = "http://localhost/cgi-bin/Server.exe";
 
+    @:final
+    static private function defaultErrorHandler( err : Dynamic ) {
+        var errstr =  Std.string(err);
+        #if js
+            untyped __js__( "console.error('Error : ' + errstr)" );
+        #else
+            throw errstr;
+        #end
+    }
+
     /**
         Gets the context for a HTTP connection to execute remote calls.
      **/
-    static function getConnection( className : String ) : HttpAsyncConnection {
+    static function getConnection( className : String, ?errorHandler : Dynamic -> Void ) : HttpAsyncConnection {
         var cnx = HttpAsyncConnection.urlConnect(URL + '/' + className);
-        cnx.setErrorHandler( function(err) {
-            var errstr =  Std.string(err);
-            untyped __js__( "console.error('Error : ' + errstr)" );
-        } );
+
+        // Use the default error handler if not specified otherwise
+        if (null == errorHandler) {
+            errorHandler = defaultErrorHandler;
+        }
+        cnx.setErrorHandler( errorHandler );
         return cnx;
     }
 
@@ -62,9 +74,11 @@ class Client {
          Remotely calls a procedure on the server and executes callback on result.
      **/
     static public function call( className : String, methodName : String,
-        params : Array<Dynamic>, ?onResult : Dynamic -> Void )
+        params : Array<Dynamic>, 
+        ?onResult : Dynamic -> Void,
+        ?onError : Dynamic -> Void )
     {
-        getConnection(className).resolve(className).resolve(methodName).call(params, onResult);
+        getConnection(className, onError).resolve(className).resolve(methodName).call(params, onResult);
     }
 
     static function main() {
