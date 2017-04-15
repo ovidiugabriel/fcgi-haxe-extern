@@ -45,7 +45,6 @@ package cpp;
 
 import haxe.remoting.Context;
 import haxe.remoting.HttpConnection;
-import cpp.Web;
 import sys.io.FileOutput;
 
 // If Dialog is not imported, Type.createInstance() will return null
@@ -96,20 +95,14 @@ class Server {
     }
 
     static private function notFound(?isFinal:Bool) {
-        //
-        // FastCGI is using 'Status: 404 Not Found' instead of 'HTTP/1.0 404 Not Found'
-        // that you may know from PHP
-        //
-        Sys.print("Status: 404 Not found\r\n");
+        Web.setReturnCode(404);
         if (isFinal) {
             Sys.print("\r\n");
         }
     }
 
     static public function logMessage(message:String) {
-        untyped __cpp__('std::ofstream outfile');
-        untyped __cpp__('outfile.open("./haxe.log", std::ios_base::app)');
-        untyped __cpp__('outfile << message << std::endl');
+        Web.logMessage(message);
     }
 
     /**
@@ -132,13 +125,13 @@ class Server {
         if (null != instance) {
 
             // Manually setting a CGI header for the response
-            Sys.print("Access-Control-Allow-Origin: *\r\n");
-            Sys.print("Access-Control-Allow-Headers: x-haxe-remoting\r\n");
-            Sys.print("X-Powered-By: fcgi-haxe-extern https://github.com/ovidiugabriel/fcgi-haxe-extern\r\n");
-            Sys.print("Content-Type: text/html\r\n");
-            Sys.print("Cache-Control: no-cache, no-store, must-revalidate\r\n");
-            Sys.print("Pragma: no-cache\r\n");
-            Sys.print("Expires: 0\r\n");
+            Web.setHeader("Access-Control-Allow-Origin", "*");
+            Web.setHeader("Access-Control-Allow-Headers", "x-haxe-remoting");
+            Web.setHeader("X-Powered-By", "fcgi-haxe-extern https://github.com/ovidiugabriel/fcgi-haxe-extern");
+            Web.setHeader("Content-Type", "text/html");
+            Web.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            Web.setHeader("Pragma", "no-cache");
+            Web.setHeader("Expires", "0");
             Sys.print("\r\n");
 
             var ctx = new haxe.remoting.Context();

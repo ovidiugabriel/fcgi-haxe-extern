@@ -1,15 +1,19 @@
 
 
-/**
+/*
  * Recommended presentation: https://www.youtube.com/watch?v=k2rw7-uL6RU
  */
+
 #if cpp
-    @:buildXml("
-        <files id='haxe'>
-            <compilerflag value='-std=c++11' />
-         </files>
-    ")
-    @:headerCode('#include "TDialog.h"')
+// Available only with a C++11 compiler
+/*
+@:buildXml("
+    <files id='haxe'>
+        <compilerflag value='-std=c++11' />
+     </files>
+")
+*/
+@:headerCode('#include "TDialog.h"')
 #end
 class Dialog {
     public function new() {}

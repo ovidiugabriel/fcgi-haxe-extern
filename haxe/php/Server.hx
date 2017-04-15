@@ -93,7 +93,7 @@ class Server {
         // FastCGI is using 'Status: 404 Not Found' instead of 'HTTP/1.0 404 Not Found'
         // that you may know from PHP
         //
-        php.Web.setReturnCode(404);
+        Web.setReturnCode(404);
     }
 
     static public function logMessage(message:String) {
@@ -120,13 +120,13 @@ class Server {
         if (null != instance) {
 
             // Manually setting a CGI header for the response
-            php.Web.setHeader("Access-Control-Allow-Origin", "*");
-            php.Web.setHeader("Access-Control-Allow-Headers", "x-haxe-remoting");
-            php.Web.setHeader("X-Powered-By", "fcgi-haxe-extern https://github.com/ovidiugabriel/fcgi-haxe-extern");
-            php.Web.setHeader("Content-Type", "text/html");
-            php.Web.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-            php.Web.setHeader("Pragma", "no-cache");
-            php.Web.setHeader("Expires", "0");
+            Web.setHeader("Access-Control-Allow-Origin", "*");
+            Web.setHeader("Access-Control-Allow-Headers", "x-haxe-remoting");
+            Web.setHeader("X-Powered-By", "fcgi-haxe-extern https://github.com/ovidiugabriel/fcgi-haxe-extern");
+            Web.setHeader("Content-Type", "text/html");
+            Web.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            Web.setHeader("Pragma", "no-cache");
+            Web.setHeader("Expires", "0");
 
             var ctx = new haxe.remoting.Context();
             ctx.addObject(pathInfo, instance);

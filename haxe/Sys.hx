@@ -102,11 +102,8 @@ extern class Sys {
         Concretely, for an executable binary, it returns the path to the binary.
         For a script (e.g. a PHP file), it returns the path to the script.
     **/
-    /*
-    static public function programPath() : String {
-        return "";
-    }
-    */
+    static public function programPath() : String;
+    // Required by Haxe Compiler v3.3.0
 
     /**
         Read a single input character from the standard input (without blocking) and returns it. Setting `echo` to true will also display it on the output.
