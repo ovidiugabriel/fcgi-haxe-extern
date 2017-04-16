@@ -1,3 +1,4 @@
 set HXCPP_MINGW=1
-haxe Client -D HXCPP_M32 -D HXCPP_STACK_TRACE -D HXCPP_STACK_LINE -D static_link -cpp output/Client
+haxe -main Main Client -D HXCPP_M32 -D HXCPP_STACK_TRACE -D HXCPP_STACK_LINE -cpp output/Client
+:: -D static_link 
 pause

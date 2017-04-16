@@ -12,7 +12,7 @@
 /* ************************************************************************* */
 
 /*
- * Copyright (c) 2015-2016, ICE Control srl.
+ * Copyright (c) 2015-2017, ICE Control srl.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -56,7 +56,6 @@ import Dialog;
         <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp' />
      </files>
 ")
-@:headerCode('#include <fstream>')
 class Server {
     /**
 

@@ -81,8 +81,21 @@ class Client {
         getConnection(className, onError).resolve(className).resolve(methodName).call(params, onResult);
     }
 
-    static function main() {
-        Dialog.div(1, 2);
-        Dialog.div(1, 0);
+	// TODO: Move this to a separate class
+    #if cpp
+    // Native C++ callbacks
+    static public var onSuccess : cpp.Function<Dynamic -> Void, cpp.abi.Abi>; 
+    static public var onError : cpp.Function<String -> Void, cpp.abi.Abi>;
+    
+    // You may want to supply 'callOnSuccess' and/or 'callOnError'
+    // to Client.call(), to get native handlers called.
+
+    static public function callOnSuccess(v : Dynamic) : Void {
+        onSuccess.call(v);
     }
+
+    static public function callOnError( errstr : String ) : Void {
+        onError.call(errstr);
+    }
+    #end
 }
