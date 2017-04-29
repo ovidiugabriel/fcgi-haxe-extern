@@ -3,7 +3,7 @@ import haxe.ds.StringMap;
 
 typedef OnEachRowFunction = Int -> Array<String> -> Void;
 
-@:headerCode('#include <stdio.h>')
+// @:headerCode('#include <stdio.h>')
 class NativeClient {
     // Native C++ callbacks
     static public var onEachRow : cpp.Function<OnEachRowFunction, cpp.abi.Abi>; 
