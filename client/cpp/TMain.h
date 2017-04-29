@@ -9,68 +9,72 @@
 #include "Client.h"
 #include "NativeClient.h"
 
+
+#include "ResultHandler.h"
+#include "Remote.h"
+
 void TMain_main();
 
-typedef void (*RowHandler)(int n, const char* row[]);
+// Public interface
 typedef void (*ErrorHandler)(const char* errstr);
 
-// (private macros)
-// This is how Haxe gets access to its own functions as callbacks
-#define DYNAMIC_FUNC(className, funcName) ::className##_obj::funcName##_dyn()
-#define BIND_NATIVE_CALLBACK(className, member, value) ::className##_obj::member = value
+// Protected interface
+typedef void (*RowHandler)(void* obj, int n, const char* row[]);
+
+#define LOG_ASSERT(x) ((void)((!(x)) && (printf("assert(" #x ") failed in %s:%d\n", __FILE__, __LINE__), 1) && (exit(1),1) ))
+
 
 // Avoid defining public functions multiple times
 #ifdef HX_DECLARE_MAIN 
 
-class Entity {
-public:
-    double div;
-};
+#include "Dialog.h"
 
-static RowHandler gRowHandler = NULL;
+
+typedef void (*FinalHandler)(void* callback, void* objects);
+
+// Private (static) variables
+static RowHandler   gRowHandler   = NULL;
+static RowHandler   gHeadHandler  = NULL;
+static ErrorHandler gErrorHandler = NULL;
+static FinalHandler gFinalHandler = NULL;
+
+static void* gObjects = NULL;
+
+#define COUNT(x)        ((signed int)(sizeof(x)/sizeof((x)[0])))
+
+void AttachFinalHandler(FinalHandler finalHandler)
+{
+
+    LOG_ASSERT(NULL != finalHandler);
+    gFinalHandler = finalHandler;
+}
+
 void AttachRowHandler(RowHandler rowHandler) 
 {
+
+    LOG_ASSERT(NULL != rowHandler);
     gRowHandler = rowHandler;
 }
 
-static RowHandler gHeadHandler = NULL;
-void AttachHeadHandler(RowHandler headHandler)
-{
-    gHeadHandler = headHandler;
-}
-
-static ErrorHandler gErrorHandler = NULL;
 void AttachErrorHandler(ErrorHandler errorHandler) 
 {
+    printf("%s %p\n", __FUNCTION__, errorHandler);
+    LOG_ASSERT(NULL != errorHandler);
     gErrorHandler = errorHandler;
 }
 
-void RemoteCall( const char* className, const char* methodName, int argc, const char* argv[])
+void SetObjectsContainer(void* obj)
 {
-    // Convert argv to VirtualArray
-    // Send an array of strings to the server
-    ::cpp::VirtualArray params = ::cpp::VirtualArray_obj::__new(argc);
-    int i;
-    for (i = 0; i < argc; i++) {
-        params->init(i, ::String(argv[i]));
-    }    
-
-    // Remote procedure call ...
-    ::Client_obj::call(::String(className), ::String(methodName), params,
-            // Dynamic Haxe callbacks as defined in Client.hx
-            DYNAMIC_FUNC(NativeClient, callOnSuccess),
-            DYNAMIC_FUNC(NativeClient, callOnError)
-        );
+    LOG_ASSERT(NULL != obj);
+    gObjects = obj;
 }
 
-void InternalResultHandler(int rowId, ::Array< ::String > row) 
+static void InternalResultHandler(int rowId, ::Array< ::String > row) 
 {
-    Int _g = 0;
     int i = 0;
     const char** vect = new const char*[row->length];
-    while (_g < row->length) {
-        ::String value = row->__get(_g);
-        ++_g;
+    while (i < row->length) {
+        ::String value = row->__get(i);
         ::cpp::Pointer<char> cstr = ::cpp::Pointer_obj::fromPointer(value.__s);
         vect[i] = (const char*) cstr;
         i++;
@@ -86,7 +90,7 @@ void InternalResultHandler(int rowId, ::Array< ::String > row)
     }
 
     if (NULL != handler) {
-        handler(row->length, vect);
+        handler(gObjects, row->length, vect);
     }
     delete vect;
 }
@@ -94,64 +98,46 @@ void InternalResultHandler(int rowId, ::Array< ::String > row)
 void InternalErrorHandler(::String errstr) 
 {
     printf("%s Error: %s\n", __FUNCTION__, (const char*) errstr);
+    // null gErrorHandler is allowed!
     if (NULL != gErrorHandler) {
         gErrorHandler((const char*) errstr);
+    } else {
+        // TODO: throw C++ exception
     }
 }
 
-#define LOG_ASSERT(x) ((void)((!(x)) && (printf("assert(" #x ") failed in %s:%d\n", __FILE__, __LINE__), 1) && (exit(1),1) ))
 
-#define REMOTE_CALL(className, methodName, count, ...) \
-    do { \
-        AttachHeadHandler(ResultHandler<className>::headHandler); \
-        AttachRowHandler(ResultHandler<className>::rowHandler); \
-        const char* args[count] = __VA_ARGS__; \
-        RemoteCall(#className, #methodName, (count), args); \
-    } while (0)
+// Pointer catre obiectul ce contine metoda __call()
+static void* gSearchCallback = NULL;
 
-// === Begin 'Dialog' definition
+void SetSearchCallback(void* searchCallback)
+{
+    LOG_ASSERT(NULL != searchCallback);
+    gSearchCallback = searchCallback;
+}
 
-class Dialog {
-    enum {
-        Field_div
-    };
-public:
-    static std::vector<Dialog*> objects;
+void InternalResultDone()
+{
 
-    double mDiv;
-    
-    static void ValidateObject(int fieldCount, const char* row[]) {
-        // Object members checking
-        LOG_ASSERT( 1 == fieldCount );
-        LOG_ASSERT( 0 == strcmp("div", row[Field_div]) );
+    LOG_ASSERT(NULL != gFinalHandler);
+    LOG_ASSERT(NULL != gSearchCallback);
+    LOG_ASSERT(NULL != gObjects);
+
+    if (gFinalHandler && gSearchCallback && gObjects) {
+        gFinalHandler(gSearchCallback, gObjects);    
     }
+}
 
-    Dialog(int fieldCount, const char* row[]) {
-        LOG_ASSERT( 1 == fieldCount );
-        LOG_ASSERT( 1 == sscanf(row[Field_div], "%lf", &(this->mDiv) ) );
+#define BIND_NATIVE_CALLBACK(className, member, value) do { \
+        ::className##_obj::member = value; \
+    } while(0)
 
-        printf("%s %s div=%lf\n", __FUNCTION__, row[Field_div], this->mDiv);
-    }
-};
-std::vector<Dialog*> Dialog::objects;
-
-// === End 'Dialog' definition
-
-// Public class ...
-template<class T>
-class ResultHandler {
-public:
-    static void rowHandler(int fieldCount, const char* row[]) 
-    {
-        T* obj = new T(fieldCount, row);
-        T::objects.push_back(obj);
-    }
-
-    static void headHandler(int fieldCount, const char* row[])
-    {
-        T::ValidateObject(fieldCount, row);
-    }
-};
+// Handlers are registered by Remote class 
+#define REMOTE_CALL(proxy, db, className, op, ...) do { \
+        Remote<className> remote((db), #className, (proxy)); \
+        const char* params[] = __VA_ARGS__; \
+        remote.call(#op, COUNT(params), params); \
+    } while(0)
 
 // This is the internal error handler... if not set...
 static void DefaultErrorHandler(const char* message) 
@@ -159,17 +145,28 @@ static void DefaultErrorHandler(const char* message)
     printf("[%s] %s\n", __FUNCTION__, message);
 }
 
+struct UserSearchCallbackProxy : public ResultHandler<Dialog>::FinalFunctor {
+    void __call(std::vector<Dialog>* userList) {
+
+        for (std::vector<Dialog>::iterator it = userList->begin(); it != userList->end(); it++) {
+            printf("f=%f\n", it->mDiv);
+        }
+    }
+};
+
 void TMain_main() 
 {
-    // Bind Private functions ...
     BIND_NATIVE_CALLBACK(NativeClient, onEachRow, InternalResultHandler);
+    BIND_NATIVE_CALLBACK(NativeClient, onDone, InternalResultDone);
     BIND_NATIVE_CALLBACK(NativeClient, onError, InternalErrorHandler);
 
-    AttachErrorHandler(DefaultErrorHandler);
+    AttachFinalHandler(ResultHandler<Dialog>::finalHandler);
 
-    // Public calls ...
-    REMOTE_CALL(Dialog, div, 2, {"1", "2"});
-    REMOTE_CALL(Dialog, div, 2, {"1", "0"});
+    UserSearchCallbackProxy proxy;
+    RemoteDatabase db("localhost", "cgi-bin/Server.exe");
+
+    REMOTE_CALL(&proxy, &db, Dialog, div, {"1", "2"});
+
 }
 #endif
 

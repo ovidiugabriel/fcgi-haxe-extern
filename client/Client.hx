@@ -44,8 +44,17 @@
 import haxe.remoting.HttpAsyncConnection;
 
 class Client {
-    static var URL:String = "http://localhost/cgi-bin/Server.exe";
+    static var URL : String = null;
 
+    /**
+        Set the URL of the Server endpoint 
+     **/
+    static public function setURL( url : String ) : Void {
+        Client.URL = url;
+    }
+
+    // Since 'private' in Haxe means protected
+    // '@:final private' is actually the real 'private'
     @:final
     static private function defaultErrorHandler( err : Dynamic ) {
         var errstr =  Std.string(err);
@@ -59,8 +68,11 @@ class Client {
     /**
         Gets the context for a HTTP connection to execute remote calls.
      **/
-    static function getConnection( className : String, ?errorHandler : Dynamic -> Void ) : HttpAsyncConnection {
-        var cnx = HttpAsyncConnection.urlConnect(URL + '/' + className);
+    static public function getConnection( className : String, ?errorHandler : Dynamic -> Void ) : HttpAsyncConnection {
+        if (null == Client.URL) {
+            return null;
+        }
+        var cnx = HttpAsyncConnection.urlConnect(Client.URL + '/' + className);
 
         // Use the default error handler if not specified otherwise
         if (null == errorHandler) {
@@ -77,6 +89,9 @@ class Client {
         ?onResult : Dynamic -> Void,
         ?onError : Dynamic -> Void )
     {
-        getConnection(className, onError).resolve(className).resolve(methodName).call(params, onResult);
+        var conn : HttpAsyncConnection = getConnection(className, onError);
+        if (null != conn) {
+            conn.resolve(className).resolve(methodName).call(params, onResult);    
+        }
     }
 }
