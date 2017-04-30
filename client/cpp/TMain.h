@@ -25,38 +25,37 @@ typedef void (*RowHandler)(void* obj, int n, const char* row[]);
 
 
 // Avoid defining public functions multiple times
-#ifdef HX_DECLARE_MAIN 
+#ifdef HX_DECLARE_MAIN
 
 #include "Dialog.h"
-
 
 typedef void (*FinalHandler)(void* callback, void* objects);
 
 // Private (static) variables
 static RowHandler   gRowHandler   = NULL;
-static RowHandler   gHeadHandler  = NULL;
 static ErrorHandler gErrorHandler = NULL;
 static FinalHandler gFinalHandler = NULL;
 
+// Pointer to object that implements __call()
+static void* gSearchCallback = NULL;
 static void* gObjects = NULL;
 
 #define COUNT(x)        ((signed int)(sizeof(x)/sizeof((x)[0])))
 
 void AttachFinalHandler(FinalHandler finalHandler)
 {
-
     LOG_ASSERT(NULL != finalHandler);
     gFinalHandler = finalHandler;
 }
 
-void AttachRowHandler(RowHandler rowHandler) 
+void AttachRowHandler(RowHandler rowHandler)
 {
 
     LOG_ASSERT(NULL != rowHandler);
     gRowHandler = rowHandler;
 }
 
-void AttachErrorHandler(ErrorHandler errorHandler) 
+void AttachErrorHandler(ErrorHandler errorHandler)
 {
     printf("%s %p\n", __FUNCTION__, errorHandler);
     LOG_ASSERT(NULL != errorHandler);
@@ -69,7 +68,7 @@ void SetObjectsContainer(void* obj)
     gObjects = obj;
 }
 
-static void InternalResultHandler(int rowId, ::Array< ::String > row) 
+static void InternalResultHandler(int rowId, ::Array< ::String > row)
 {
     int i = 0;
     const char** vect = new const char*[row->length];
@@ -85,30 +84,21 @@ static void InternalResultHandler(int rowId, ::Array< ::String > row)
         handler = gRowHandler;
     }
 
-    if ((-1 == rowId) && (NULL != gHeadHandler)) {
-        handler = gHeadHandler;
-    }
-
     if (NULL != handler) {
         handler(gObjects, row->length, vect);
     }
     delete vect;
 }
 
-void InternalErrorHandler(::String errstr) 
+void InternalErrorHandler(::String errstr)
 {
-    printf("%s Error: %s\n", __FUNCTION__, (const char*) errstr);
-    // null gErrorHandler is allowed!
     if (NULL != gErrorHandler) {
         gErrorHandler((const char*) errstr);
     } else {
-        // TODO: throw C++ exception
+        // throw C++ exception
+        throw std::string(errstr.c_str());
     }
 }
-
-
-// Pointer catre obiectul ce contine metoda __call()
-static void* gSearchCallback = NULL;
 
 void SetSearchCallback(void* searchCallback)
 {
@@ -118,13 +108,12 @@ void SetSearchCallback(void* searchCallback)
 
 void InternalResultDone()
 {
-
     LOG_ASSERT(NULL != gFinalHandler);
     LOG_ASSERT(NULL != gSearchCallback);
     LOG_ASSERT(NULL != gObjects);
 
     if (gFinalHandler && gSearchCallback && gObjects) {
-        gFinalHandler(gSearchCallback, gObjects);    
+        gFinalHandler(gSearchCallback, gObjects);
     }
 }
 
@@ -132,7 +121,7 @@ void InternalResultDone()
         ::className##_obj::member = value; \
     } while(0)
 
-// Handlers are registered by Remote class 
+// Handlers are registered by Remote class
 #define REMOTE_CALL(proxy, db, className, op, ...) do { \
         Remote<className> remote((db), #className, (proxy)); \
         const char* params[] = __VA_ARGS__; \
@@ -140,9 +129,9 @@ void InternalResultDone()
     } while(0)
 
 // This is the internal error handler... if not set...
-static void DefaultErrorHandler(const char* message) 
+static void DefaultErrorHandler(const char* message)
 {
-    printf("[%s] %s\n", __FUNCTION__, message);
+    throw std::string(message);
 }
 
 struct UserSearchCallbackProxy : public ResultHandler<Dialog>::FinalFunctor {
@@ -154,7 +143,7 @@ struct UserSearchCallbackProxy : public ResultHandler<Dialog>::FinalFunctor {
     }
 };
 
-void TMain_main() 
+void TMain_main()
 {
     BIND_NATIVE_CALLBACK(NativeClient, onEachRow, InternalResultHandler);
     BIND_NATIVE_CALLBACK(NativeClient, onDone, InternalResultDone);
@@ -163,10 +152,14 @@ void TMain_main()
     AttachFinalHandler(ResultHandler<Dialog>::finalHandler);
 
     UserSearchCallbackProxy proxy;
-    RemoteDatabase db("localhost", "cgi-bin/Server.exe");
+    ServiceEndpoint db("localhost", "cgi-bin/Server.exe");
 
-    REMOTE_CALL(&proxy, &db, Dialog, div, {"1", "2"});
-
+    try {
+        REMOTE_CALL(&proxy, &db, Dialog, div, {"1", "2"});
+        REMOTE_CALL(&proxy, &db, Dialog, div, {"1", "0"});
+    } catch (std::string errmsg) {
+        fprintf(stderr, "Error: %s\n", errmsg.c_str());
+    }
 }
 #endif
 

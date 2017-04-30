@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#include "ServiceEndpoint.h"
+
 using std::vector;
 using std::string;
 
@@ -16,35 +18,6 @@ void AttachRowHandler(RowHandler rowHandler);
 
 static void RemoteCall( const char* className, const char* methodName, int argc, const char* argv[]);
 
-// ケンタマ
-class RemoteDatabase {
-
-    std::string mHostName;
-    std::string mPort;
-    std::string mDatabaseName;
-
-    std::string mUserName;
-    std::string mPassword;
-public:
-
-    RemoteDatabase(string host, string dbname, string port = "80") :
-        mHostName(host),
-        mDatabaseName(dbname),
-        mPort(port)
-    {
-
-    }
-
-    void setCredentials(std::string username, std::string passwd) {
-        this->mUserName = username;
-        this->mPassword = passwd;
-    }
-
-    const char* getURL() {
-        return ("http://" + mHostName + ":" + mPort + "/" + mDatabaseName).c_str();
-    }
-};
-
 template<class T>
 class Remote {
     explicit Remote() {}
@@ -52,7 +25,7 @@ class Remote {
 public:
 
     // Use REMOTE_TYPE() to create specializations of this constructor
-    Remote(RemoteDatabase* db, std::string className, FinalFunctor* proxy) :
+    Remote(ServiceEndpoint* db, std::string className, FinalFunctor* proxy) :
         mDb(db),
         mClassName(className),
         mProxy(proxy)
@@ -76,7 +49,7 @@ public:
 
 private:
 
-    RemoteDatabase* mDb;
+    ServiceEndpoint* mDb;
     std::string mClassName;
     FinalFunctor* mProxy;
 
@@ -130,6 +103,5 @@ static void RemoteCall( const char* className, const char* methodName, int argc,
             DYNAMIC_FUNC(NativeClient, callOnError)
         );
 }
-
 
 #endif

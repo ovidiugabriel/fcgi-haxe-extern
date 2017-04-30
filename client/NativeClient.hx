@@ -3,19 +3,16 @@ import haxe.ds.StringMap;
 
 typedef OnEachRowFunction = Int -> Array<String> -> Void;
 
-// @:headerCode('#include <stdio.h>')
 class NativeClient {
     // Native C++ callbacks
-    static public var onEachRow : cpp.Function<OnEachRowFunction, cpp.abi.Abi>; 
+    static public var onEachRow : cpp.Function<OnEachRowFunction, cpp.abi.Abi>;
     static public var onDone : cpp.Function<Void -> Void, cpp.abi.Abi> ;
     static public var onError : cpp.Function<String -> Void, cpp.abi.Abi>;
- 
+
     // You may want to supply 'callOnSuccess' and/or 'callOnError'
     // to Client.call(), to get native handlers called.
 
     static public function callOnSuccess( result : Array<StringMap<Dynamic>> ) : Void {
-        // trace(haxe.Json.stringify(result));
-
         if (null == onEachRow) {
             trace('onEachRow is not set');
             return;
@@ -29,7 +26,7 @@ class NativeClient {
             }
             onEachRow.call(-1, keys);
         }
-        
+
         var i : Int = 0;
         for (row in result) {
             var array : Array<String> = new Array<String>();
@@ -45,11 +42,9 @@ class NativeClient {
         } else {
             trace('onDone is not set');
         }
-        
     }
 
     static public function callOnError( errstr : String ) : Void {
-        trace('callOnError ' + errstr);
         onError.call(errstr);
     }
 }
