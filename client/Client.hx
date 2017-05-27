@@ -12,7 +12,7 @@
 /* ************************************************************************* */
 
 /*
- * Copyright (c) 2015, ICE Control srl.
+ * Copyright (c) 2015-2017, ICE Control srl.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -47,7 +47,7 @@ class Client {
     static var URL : String = null;
 
     /**
-        Set the URL of the Server endpoint 
+        Set the URL of the Server endpoint
      **/
     static public function setURL( url : String ) : Void {
         Client.URL = url;
@@ -85,13 +85,13 @@ class Client {
     /**
          Remotely calls a procedure on the server and executes callback on result.
      **/
-    static public function call( className : String, methodName : String, params : Array<Dynamic>, 
+    static public function call( className : String, methodName : String, params : Array<Dynamic>,
         ?onResult : Dynamic -> Void,
         ?onError : Dynamic -> Void )
     {
         var conn : HttpAsyncConnection = getConnection(className, onError);
         if (null != conn) {
-            conn.resolve(className).resolve(methodName).call(params, onResult);    
+            conn.resolve(className).resolve(methodName).call(params, onResult);
         }
     }
 }

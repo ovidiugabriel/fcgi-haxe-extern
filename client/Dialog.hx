@@ -5,7 +5,7 @@ class Dialog {
     }
 
     static function onError(errstr) {
-    	trace('ERROR: $errstr');
+        trace('ERROR: $errstr');
     }
 
     static public function div( x : Float, y : Float ) : Void {

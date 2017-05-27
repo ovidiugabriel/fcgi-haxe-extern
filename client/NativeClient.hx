@@ -12,29 +12,23 @@ class NativeClient {
     // You may want to supply 'callOnSuccess' and/or 'callOnError'
     // to Client.call(), to get native handlers called.
 
-    static public function callOnSuccess( result : Array<StringMap<Dynamic>> ) : Void {
+    static public function callOnSuccess( result : Array<Array<String>> ) : Void {
         if (null == onEachRow) {
-            trace('onEachRow is not set');
             return;
         }
 
+        trace(result);
+
         if (result.length > 0) {
-            var keys : Array<String> = new Array<String>();
-            var row = result[0];
-            for (key in row.keys()) {
-                keys.push(key);
-            }
-            onEachRow.call(-1, keys);
+            // first row always contains headers
+            trace(result[0]);
+            onEachRow.call(-1, result[0]);
         }
 
-        var i : Int = 0;
-        for (row in result) {
-            var array : Array<String> = new Array<String>();
-            for (key in row.keys()) {
-                array.push(row.get(key));
-            }
-            onEachRow.call(i, array);
-            i++;
+        var i:Int = 1;
+        for (i in 1...result.length) {
+            trace(result[i]);
+            onEachRow.call(i-1, result[i]);
         }
 
         if (null != onDone) {

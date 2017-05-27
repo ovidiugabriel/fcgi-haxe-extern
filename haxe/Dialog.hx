@@ -20,7 +20,7 @@ import haxe.ds.StringMap;
 class Dialog {
     public function new() {}
 
-    public function div( x : Float, y : Float ) : Array<StringMap<Dynamic>> {
+    public function div( x : Float, y : Float ) : Array<Array<Dynamic>> {
         /*
         #if cpp
             untyped __cpp__('Result<double> result = TDialog::div(x, y)');
@@ -31,15 +31,25 @@ class Dialog {
         if (0 == y) {
             throw "division by zero";
         }
-        var result = new Array<StringMap<Dynamic>>();
-        var row = new StringMap<Dynamic>();
-        row.set("div", x / y);
+        var result = new Array<Array<Dynamic>>();
+
+        // Header (names of fields)
+        var header = new Array<String>();
+        header.push("div");
+        result.push(header);
+
+        var row:Array<Dynamic>;
+
+        // First row
+        row = new Array<Dynamic>();
+        row.push(x/y);
         result.push(row);
 
-        row = new StringMap<Dynamic>();
-        row.set("div", x / y);
+        // Second row
+        row = new Array<Dynamic>();
+        row.push(x/y);
         result.push(row);
+
         return result;
-    
     }
 }

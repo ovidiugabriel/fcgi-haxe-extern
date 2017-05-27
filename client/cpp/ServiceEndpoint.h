@@ -3,7 +3,6 @@
 
 #include <string>
 
-// ケンタマ
 class ServiceEndpoint {
 
     std::string mHostName;
