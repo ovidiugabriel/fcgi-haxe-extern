@@ -57,6 +57,7 @@ class Client {
     // '@:final private' is actually the real 'private'
     @:final
     static private function defaultErrorHandler( err : Dynamic ) {
+        trace('defaultErrorHandler');
         var errstr =  Std.string(err);
         #if js
             untyped __js__( "console.error('Error : ' + errstr)" );

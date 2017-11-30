@@ -90,13 +90,21 @@ static void InternalResultHandler(int rowId, ::Array< ::String > row)
     delete vect;
 }
 
+// This is the internal error handler... if not set...
+static void DefaultErrorHandler(const char* message)
+{
+    printf("TMain.h:%d DefaultErrorHandler\n", __LINE__);
+    throw std::string(message);
+}
+
 void InternalErrorHandler(::String errstr)
 {
+    printf("%s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);
     if (NULL != gErrorHandler) {
+        printf("gErrorHandler: %p\n", gErrorHandler);
         gErrorHandler((const char*) errstr);
     } else {
-        // throw C++ exception
-        throw std::string(errstr.c_str());
+        DefaultErrorHandler(errstr.c_str());
     }
 }
 
@@ -128,12 +136,6 @@ void InternalResultDone()
         remote.call(#op, COUNT(params), params); \
     } while(0)
 
-// This is the internal error handler... if not set...
-static void DefaultErrorHandler(const char* message)
-{
-    throw std::string(message);
-}
-
 struct UserSearchCallbackProxy : public ResultHandler<Dialog>::FinalFunctor {
     void __call(std::vector<Dialog>* userList) {
 
@@ -149,6 +151,9 @@ void TMain_main()
     BIND_NATIVE_CALLBACK(NativeClient, onDone, InternalResultDone);
     BIND_NATIVE_CALLBACK(NativeClient, onError, InternalErrorHandler);
 
+    AttachErrorHandler(DefaultErrorHandler);
+
+    // Why call this here???
     AttachFinalHandler(ResultHandler<Dialog>::finalHandler);
 
     UserSearchCallbackProxy proxy;
@@ -158,7 +163,7 @@ void TMain_main()
         REMOTE_CALL(&proxy, &db, Dialog, div, {"1", "2"});
         REMOTE_CALL(&proxy, &db, Dialog, div, {"1", "0"});
     } catch (std::string errmsg) {
-        fprintf(stderr, "Error: %s\n", errmsg.c_str());
+        fprintf(stderr, "Exception Caught - Error: %s\n", errmsg.c_str());
     }
 }
 #endif
