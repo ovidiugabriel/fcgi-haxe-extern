@@ -81,6 +81,7 @@ class Server {
     public static function getClassName() : String {
         var v:String = Web.getParams().get("__x");
         if (null == v) {
+            logMessage("Haxe Remoting parameter __x not received");
             return null;
         }
         var u = new haxe.Unserializer(StringTools.urlDecode(v));

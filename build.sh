@@ -1,14 +1,18 @@
 #!/bin/bash -x
 
+# - build the server
+# - deploy the server
+# - test the server code in command line
+
+# - build the JavaScript client
+# - deploy the JavaScript client
 #
-# :: Need to have MSVC installed and run this script from command line
-# :: Tested in cygwin also
+# Build the server
 #
 
-# PATH=$(printf "%q" "$PATH")
 export FCGI_HAXE_EXTERN_PATH=`cygpath -w $PWD`
 export HXCPP_MINGW=1
-export MINGW_ROOT="/cygdrive/c/Qt/Tools/mingw530_32"
+# export MINGW_ROOT="/cygdrive/c/Qt/Tools/mingw530_32"
 
 # Cleanup old server files
 if [ "1" == "$CLEAN" ] ; then
@@ -20,47 +24,59 @@ haxe build.hxml
 cd ..
 
 # :: building the executable file
-pushd "test/Server"
-qmake -d 2> qmake.log
-mingw32-make clean
-mingw32-make
-popd
+# pushd "test/Server"
+# qmake -d 2> qmake.log
+# if [ "1" == "$CLEAN" ] ; then
+#     mingw32-make clean
+# fi
+# mingw32-make
+# popd
+
+#
+# Deploy the server
+#
 
 # :: copy the executable to the cgi-bin folder
-SERVER_EXE="/cygdrive/c/xampp/cgi-bin/Server.exe"
-if [ -e $SERVER_EXE ] ; then
-    rm $SERVER_EXE
+
+XAMPP_PATH=$(cygpath "C:\xampp")
+CGI_BIN_PATH=$XAMPP_PATH/cgi-bin
+CGI_SERVER_EXE=$CGI_BIN_PATH/Server.exe
+
+if [ -e $CGI_SERVER_EXE ] ; then
+    rm $CGI_SERVER_EXE
 fi
-SERVER="./test/Server/debug/Server.exe"
+
+SERVER=$PWD/Server/Server.exe
 if [ -e $SERVER ] ; then
-    cp $SERVER /cygdrive/c/xampp/cgi-bin
+    cp $SERVER $CGI_BIN_PATH
 else
     echo "Server $SERVER not built"
     exit 1
 fi
 
-# :: simply execute the binary in the console to check for the output
-export PATH_INFO="/Dialog"
-$SERVER
+#
+# Building JavaScript client
+#
 
-# Building client project
 pushd client
-haxe -main Client -debug -js js/Client.js
+haxe -main Main Client -debug -js js/Client.js
 popd
 
 # "//# sourceMappingURL=http://example.com/path/to/your/sourcemap.map"
 
-#  Copying client JavaScript files
-HTDOCS="/cygdrive/c/xampp/htdocs"
-cp ./client/test.html $HTDOCS
-cp ./client/.htaccess $HTDOCS
+#
+# Deploy the JavaScript client
+#
 
-JSDIR="/cygdrive/c/xampp/htdocs/js"
+#  Copying client JavaScript files
+HTDOCS=$XAMPP_PATH/htdocs
+
+cp $PWD/client/test.html $HTDOCS
+cp $PWD/client/.htaccess $HTDOCS
+
+JSDIR=$HTDOCS/js
 if [ ! -d $JSDIR ] ; then
     mkdir $JSDIR
 fi
-cp ./client/js/Client.js $JSDIR
-
-# Running client test in browser
-firefox http://localhost/test.html
+cp $PWD/client/js/Client.js $JSDIR
 

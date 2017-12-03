@@ -71,6 +71,9 @@ class Client {
      **/
     static public function getConnection( className : String, ?errorHandler : Dynamic -> Void ) : HttpAsyncConnection {
         if (null == Client.URL) {
+            #if js
+                untyped __js__('throw "ERROR: URL is not set"');
+            #end
             return null;
         }
         var cnx = HttpAsyncConnection.urlConnect(Client.URL + '/' + className);
@@ -88,11 +91,15 @@ class Client {
      **/
     static public function call( className : String, methodName : String, params : Array<Dynamic>,
         ?onResult : Dynamic -> Void,
-        ?onError : Dynamic -> Void )
+        ?onError : Dynamic -> Void ): Void
     {
         var conn : HttpAsyncConnection = getConnection(className, onError);
         if (null != conn) {
             conn.resolve(className).resolve(methodName).call(params, onResult);
+        } else {
+            #if js
+                untyped __js__('throw "ERROR: No active connection"');
+            #end
         }
     }
 }

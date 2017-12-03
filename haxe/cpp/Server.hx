@@ -111,7 +111,7 @@ class Server {
         var pathInfo:String = getClassName();
 
         if (null == pathInfo) {
-	    logMessage("ERROR: Invalid request. No class name specified.");
+            logMessage("ERROR: Invalid request. No class name specified.");
             Server.notFound(true);
             return;
         }
