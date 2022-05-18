@@ -21,16 +21,19 @@ class Dialog {
     public function new() {}
 
     public function div( x : Float, y : Float ) : Array<Array<Dynamic>> {
+        Logging.info('Dialog.div');
         /*
         #if cpp
             untyped __cpp__('Result<double> result = TDialog::div(x, y)');
             return cpp.CatchException.getResult();
         #else
         */
-
+/*
         if (0 == y) {
+            Logging.info('throwing Dialog.div');
             throw "division by zero";
         }
+        */
         var result = new Array<Array<Dynamic>>();
 
         // Header (names of fields)
@@ -49,6 +52,8 @@ class Dialog {
         row = new Array<Dynamic>();
         row.push(x/y);
         result.push(row);
+
+        Logging.info('result = ' + result.toString());
 
         return result;
     }

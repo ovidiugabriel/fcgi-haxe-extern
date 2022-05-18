@@ -10,5 +10,5 @@ if [ "" == "$FCGI_HAXE_EXTERN_PATH" ] ; then
     exit 1
 fi
 
-haxe -main Main Client NativeClient -D HXCPP_M32 -D HXCPP_STACK_TRACE -D HXCPP_STACK_LINE -cpp output/Client
+haxe -main Main Client NativeClient HttpAsyncConnection -D HXCPP_M32 -D HXCPP_STACK_TRACE -D HXCPP_STACK_LINE -cpp output/Client
 # -D static_link

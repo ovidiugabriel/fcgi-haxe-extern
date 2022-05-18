@@ -21,6 +21,9 @@ fi
 
 cd haxe
 haxe build.hxml
+if [ "$?" != "0" ] ; then
+    exit 1
+fi
 cd ..
 
 # :: building the executable file
@@ -48,7 +51,12 @@ fi
 
 SERVER=$PWD/Server/Server.exe
 if [ -e $SERVER ] ; then
-    cp $SERVER $CGI_BIN_PATH
+    cp $SERVER                        $CGI_BIN_PATH
+
+    # TODO: detect dependencies
+    # copy dependencies
+    cp $PWD/Server/libgcc_s_dw2-1.dll $CGI_BIN_PATH
+    cp $PWD/Server/libstdc++-6.dll    $CGI_BIN_PATH
 else
     echo "Server $SERVER not built"
     exit 1
@@ -70,13 +78,16 @@ popd
 
 #  Copying client JavaScript files
 HTDOCS=$XAMPP_PATH/htdocs
+mkdir -p $HTDOCS/fcgi-client
 
-cp $PWD/client/test.html $HTDOCS
-cp $PWD/client/.htaccess $HTDOCS
+cp $PWD/client/test.html $HTDOCS/fcgi-client
+cp $PWD/client/.htaccess $HTDOCS/fcgi-client
 
-JSDIR=$HTDOCS/js
+JSDIR=$HTDOCS/fcgi-client/js
 if [ ! -d $JSDIR ] ; then
     mkdir $JSDIR
 fi
-cp $PWD/client/js/Client.js $JSDIR
 
+# copy javascript and source map file
+cp $PWD/client/js/Client.js $JSDIR
+cp $PWD/client/js/Client.js.map $JSDIR

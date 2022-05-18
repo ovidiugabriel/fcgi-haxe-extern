@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-class Sys_obj {
+class Sys {
 public:
     static int print(const char* v) {
         return printf("%s", v);

@@ -4,15 +4,15 @@
 /*  Title:       Server.hx                                                   */
 /*                                                                           */
 /*  Created on:  20.08.2016 at 02:52                                         */
-/*  Email:       ovidiugabriel@gmail.com                                     */
-/*  Copyright:   (C) 2015 ICE Control srl. All Rights Reserved.              */
+/*  Email:       ovidiugabriel {at} gmail {punkt} com                        */
+/*  Copyright:   (C) 2015-2022 SoftICE Development OU. All Rights Reserved.  */
 /*                                                                           */
 /*  $Id$                                                                     */
 /*                                                                           */
 /* ************************************************************************* */
 
 /*
- * Copyright (c) 2015-2017, ICE Control srl.
+ * Copyright (c) 2015-2022, SoftICE Development OU.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -43,8 +43,6 @@
 
 package cpp;
 
-import haxe.remoting.Context;
-import haxe.remoting.HttpConnection;
 import sys.io.FileOutput;
 
 // If Dialog is not imported, Type.createInstance() will return null
@@ -57,23 +55,34 @@ import Dialog;
      </files>
 ")
 class Server {
+    static public function processRequest( requestData : String, ctx : Context ) : String {
+        var u = new haxe.Unserializer(requestData);
+        var path : Array<String> = u.unserialize();
+        var args : Array<Dynamic> = u.unserialize();
+        var data = ctx.call(path, args);
+        var s = new haxe.Serializer();
+        s.serialize(data);
+        return "hxr" + s.toString();
+    }
+
     /**
 
      **/
-    public static function handleRequest( ctx : Context ) : Bool {
-        var v:String = Web.getParams().get("__x");
+    static public function handleRequest( ctx : Context ) : Bool {
+        var v = Web.getParams().get("__x");
         if (v == null) {
             return false;
         }
-        Sys.print(HttpConnection.processRequest(StringTools.urlDecode(v), ctx));
+        Sys.print(processRequest(StringTools.urlDecode(v), ctx));
         return true;
     }
 
-    public static function getPathInfo() : String {
+    static public function getPathInfo() : String {
         var pathInfo:String = Sys.getEnv("PATH_INFO");
 
         if (pathInfo.charAt(0) == '"') {
-            logMessage("ERROR: Don't use quotes on Windows.\n");
+            // TODO: test if on Windows
+            Logging.info("ERROR: Don't use quotes on Windows");
             return null;
         }
 
@@ -83,14 +92,20 @@ class Server {
         return pathInfo;
     }
 
-    public static function getClassName() : String {
-        var v:String = Web.getParams().get("__x");
+    static public function getClassName() : String {
+        var v  = Web.getParams().get("__x");
         if (null == v) {
             return null;
         }
-        var u = new haxe.Unserializer(StringTools.urlDecode(v));
-        var path = u.unserialize();
-        return path[0];
+
+        try {
+            var u = new haxe.Unserializer(StringTools.urlDecode(v));
+            var path = u.unserialize();
+            return path[0];
+        } catch (e : Dynamic) {
+            Logging.info('ERROR: Could not unserialize parameter __x');
+        }
+        return null;
     }
 
     static private function notFound(?isFinal:Bool) {
@@ -100,21 +115,25 @@ class Server {
         }
     }
 
-    static public function logMessage(message:String) {
-        Web.logMessage(message);
-    }
-
     /**
 
      **/
     static public function main() {
-        var pathInfo:String = getClassName();
+        var pathInfo : String = getClassName();
 
         if (null == pathInfo) {
-            logMessage("ERROR: Invalid request. No class name specified.");
+            Logging.info("ERROR: Invalid request. No class name specified.");
             Server.notFound(true);
             return;
         }
+
+        var defaultHeaders = [
+            "Access-Control-Allow-Origin" => "*",
+            "Content-Type"                => "text/html",
+            "Cache-Control"               => "no-cache, no-store, must-revalidate",
+            "Pragma"                      => "no-cache",
+            "Expires"                     => "0"
+        ];
 
         //
         // The method to be executed is required to be an instance method
@@ -123,22 +142,20 @@ class Server {
         var instance = Type.createInstance(Type.resolveClass(pathInfo), []);
         if (null != instance) {
 
-            // Manually setting a CGI header for the response
-            Web.setHeader("Access-Control-Allow-Origin", "*");
-            Web.setHeader("Access-Control-Allow-Headers", "x-haxe-remoting");
-            Web.setHeader("X-Powered-By", "fcgi-haxe-extern https://github.com/ovidiugabriel/fcgi-haxe-extern");
-            Web.setHeader("Content-Type", "text/html");
-            Web.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-            Web.setHeader("Pragma", "no-cache");
-            Web.setHeader("Expires", "0");
+            for (key in defaultHeaders.keys()) {
+                Web.setHeader(key, defaultHeaders[key]);
+                // FIXME add a way to alter headers after their first set
+            }
+
+            // End of CGI header
             Sys.print("\r\n");
 
-            var ctx = new haxe.remoting.Context();
+            var ctx = new Context();
             ctx.addObject(pathInfo, instance);
 
             handleRequest(ctx);
         } else {
-            logMessage('ERROR: instance for $pathInfo is null');
+            Logging.info('ERROR: instance for "$pathInfo" is null');
             Server.notFound(true);
         }
     }

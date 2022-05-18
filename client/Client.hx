@@ -5,14 +5,14 @@
 /*                                                                           */
 /*  Created on:  20.08.2016 at 02:52                                         */
 /*  Email:       ovidiugabriel@gmail.com                                     */
-/*  Copyright:   (C) 2015 ICE Control srl. All Rights Reserved.              */
+/*  Copyright:   (C) 2015-2022 SoftICE Development OU. All Rights Reserved.  */
 /*                                                                           */
 /*  $Id$                                                                     */
 /*                                                                           */
 /* ************************************************************************* */
 
 /*
- * Copyright (c) 2015-2017, ICE Control srl.
+ * Copyright (c) 2015-2022, SoftICE Development OU.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -41,8 +41,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import haxe.remoting.HttpAsyncConnection;
-
 class Client {
     static var URL : String = null;
 
@@ -53,29 +51,24 @@ class Client {
         Client.URL = url;
     }
 
-    // Since 'private' in Haxe means protected
-    // '@:final private' is actually the real 'private'
-    @:final
+    /**
+
+     **/
     static private function defaultErrorHandler( err : Dynamic ) {
         trace('defaultErrorHandler');
         var errstr =  Std.string(err);
-        #if js
-            untyped __js__( "console.error('Error : ' + errstr)" );
-        #else
-            throw errstr;
-        #end
+        js.Browser.console.error('Error: $errstr');
     }
 
     /**
         Gets the context for a HTTP connection to execute remote calls.
      **/
-    static public function getConnection( className : String, ?errorHandler : Dynamic -> Void ) : HttpAsyncConnection {
+    static public function getConnection( className : String, ?errorHandler : Dynamic -> Void ) : HttpAsyncConnection
+    {
         if (null == Client.URL) {
-            #if js
-                untyped __js__('throw "ERROR: URL is not set"');
-            #end
-            return null;
+            throw "ERROR: URL is not set";
         }
+
         var cnx = HttpAsyncConnection.urlConnect(Client.URL + '/' + className);
 
         // Use the default error handler if not specified otherwise
@@ -91,15 +84,13 @@ class Client {
      **/
     static public function call( className : String, methodName : String, params : Array<Dynamic>,
         ?onResult : Dynamic -> Void,
-        ?onError : Dynamic -> Void ): Void
+        ?onError : Dynamic -> Void ) : Void
     {
         var conn : HttpAsyncConnection = getConnection(className, onError);
         if (null != conn) {
             conn.resolve(className).resolve(methodName).call(params, onResult);
-        } else {
-            #if js
-                untyped __js__('throw "ERROR: No active connection"');
-            #end
+            return;
         }
+        throw "ERROR: No active connection";
     }
 }

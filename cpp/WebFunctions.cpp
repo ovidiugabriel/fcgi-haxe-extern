@@ -45,7 +45,7 @@
 
 static int GetPostLength()
 {
-    TRACE( __FUNCTION__ );
+    // TRACE( __FUNCTION__ );
     int ret = 0;
     char *clen = getenv("CONTENT_LENGTH");
     if (clen == NULL) {
@@ -61,7 +61,7 @@ static int GetPostLength()
 static std::string GetPostData()
 {
     static char* c = NULL;
-    TRACE( __FUNCTION__ );
+    // TRACE( __FUNCTION__ );
 
     int length = GetPostLength();
     if (length == 0) {              // POST data is empty
@@ -90,14 +90,14 @@ static std::string GetPostData()
 
 static std::string GetParamsString()
 {
-    TRACE( __FUNCTION__ );
+    // TRACE( __FUNCTION__ );
     const char *s = getenv("QUERY_STRING");
     return (s != NULL) ? std::string(s) : std::string("");
 }
 
 static std::string GetCompleteQueryString(std::string post, std::string get)
 {
-    TRACE( __FUNCTION__ );
+    // TRACE( __FUNCTION__ );
     std::string base = "";
     if (post.length() != 0) {
         base.append(post);
@@ -113,7 +113,7 @@ static std::string GetCompleteQueryString(std::string post, std::string get)
 
 static std::string ParseKey(std::string data)
 {
-    TRACE( __FUNCTION__ );
+    // TRACE( __FUNCTION__ );
     std::string::size_type pos = data.find("=");
     if (pos != std::string::npos) {
         return data.substr(0,pos);
@@ -123,7 +123,7 @@ static std::string ParseKey(std::string data)
 
 static std::string ParseValue(std::string data)
 {
-    TRACE( __FUNCTION__ );
+    // TRACE( __FUNCTION__ );
     std::string::size_type pos = data.find("=");
     if (pos != std::string::npos) {
         return data.substr(pos+1);

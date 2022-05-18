@@ -59,6 +59,5 @@ extern class Web {
 	public static function getParams() : Map<String, String>;
 	public static function setReturnCode( r : Int ) : Void;
 	public static function setHeader( h : String, v : String ) : Void;
-	public static function logMessage( msg : String ) : Void;
 //	public static function getClientHeader(k:String):String;
 }

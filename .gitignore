@@ -1,2 +1,7 @@
 .idea
 *.iml
+*.sublime-workspace
+
+# Output artifacts folder
+Server/*
+client/js/*

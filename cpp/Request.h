@@ -55,7 +55,7 @@ class Request {
 public:
     Request()
     {
-        TRACE( __FUNCTION__ );
+        // TRACE( __FUNCTION__ );
         header_sent = false;
         post_fetched = false;
         postData = "";
@@ -63,7 +63,7 @@ public:
 
     std::string getPostData()
     {
-        TRACE( __FUNCTION__ );
+        // TRACE( __FUNCTION__ );
         if (!post_fetched) {
             postData = ::GetPostData();
             post_fetched = true;

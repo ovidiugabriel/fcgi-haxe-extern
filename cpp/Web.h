@@ -73,10 +73,10 @@
 // PUBLIC CLASS (PART OF THE INTERFACE WITH HAXE)
 //
 
-class Web_obj {
+class Web {
 public:
     static hx::ObjectPtr<haxe::ds::StringMap_obj> getParams() {
-        TRACE( __FUNCTION__ );
+        // TRACE( __FUNCTION__ );
         hx::ObjectPtr<haxe::ds::StringMap_obj> params = new haxe::ds::StringMap_obj();
 
         Request request;
@@ -159,12 +159,6 @@ public:
 
     static void setHeader(::String h, ::String v) {
         printf("%s: %s\r\n", h.c_str(), v.c_str());
-    }
-
-    static void logMessage(::String message) {
-        std::ofstream outfile;
-        outfile.open("./haxe.log", std::ios_base::app);
-        outfile << message << std::endl;
     }
 };
 
