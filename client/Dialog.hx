@@ -1,7 +1,7 @@
 
 class Dialog {
     static function display(v) {
-        trace(v);
+        Logging.getConsole().log(v);
     }
 
     static function onError(errstr : String) {
@@ -9,7 +9,7 @@ class Dialog {
     }
 
     static public function div( x : Float, y : Float ) : Void {
-        trace('Dialog.div x=', x, ' y=', y);
+        Logging.getConsole().log('Dialog.div x=', x, ' y=', y);
         Client.call('Dialog', 'div', [x, y], display, onError);
     }
 }

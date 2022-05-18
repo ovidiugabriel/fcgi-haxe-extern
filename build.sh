@@ -68,6 +68,9 @@ fi
 
 pushd client
 haxe -main Main Client -debug -js js/Client.js
+if [ "$?" != "0" ] ; then
+    exit 1
+fi
 popd
 
 # "//# sourceMappingURL=http://example.com/path/to/your/sourcemap.map"

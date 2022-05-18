@@ -55,9 +55,8 @@ class Client {
 
      **/
     static private function defaultErrorHandler( err : Dynamic ) {
-        trace('defaultErrorHandler');
         var errstr =  Std.string(err);
-        js.Browser.console.error('Error: $errstr');
+        Logging.getConsole().error('Error: $errstr');
     }
 
     /**

@@ -21,7 +21,7 @@ class Main {
         #if cpp
             untyped __cpp__('TMain_main()');
         #elseif js
-            trace('Main.main()');
+            haxe.Log.trace = untyped console.log.bind(console.log);
 
             // We need to know the endpoint URL
             Client.setURL("http://localhost/cgi-bin/Server.exe");
