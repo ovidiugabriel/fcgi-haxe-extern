@@ -18,9 +18,15 @@ public:
         return printf("%f", v);
     }
 
-    static String getEnv(const char* s) {
+    static ::String getEnv(const char* s) {
         return ::String(getenv(s));
+    }
+
+    static ::String systemName() {
+        #if defined(_WIN32) || defined(__CYGWIN__)
+            return ::String("Windows");
+        #endif
     }
 };
 
-#endif
+#endif // SYS_H

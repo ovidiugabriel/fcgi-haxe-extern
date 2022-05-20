@@ -80,12 +80,6 @@ class Server {
     static public function getPathInfo() : String {
         var pathInfo:String = Sys.getEnv("PATH_INFO");
 
-        if (pathInfo.charAt(0) == '"') {
-            // TODO: test if on Windows
-            Logging.info("ERROR: Don't use quotes on Windows");
-            return null;
-        }
-
         if (pathInfo.charAt(0) == '/') {
             pathInfo = pathInfo.substr(1);
         }
