@@ -58,7 +58,14 @@ package cpp;
 extern class Web {
 	public static function getParams() : Map<String, String>;
 	public static function setReturnCode( r : Int ) : Void;
-	public static function setHeader( h : String, v : String ) : Void;
+
+    /**
+     * Set an output header value.
+     * If some data have been printed, the headers have already been sent so
+     * this will raise an exception.
+     */
+	public static function setHeader( h : String, v : String, ?replace : Bool = true, ?responseCode : Int = 0 ) : Void;
 //	public static function getClientHeader(k:String):String;
     public static function flush() : Void;
 }
+

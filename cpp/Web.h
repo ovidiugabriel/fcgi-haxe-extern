@@ -159,20 +159,25 @@ public:
         setHeader("Status", code.c_str());
     }
 
-    static void setHeader(::String h, ::String v) {
+    static void setHeader(::String h, ::String v, bool replace = true, int responseCode = 0) {
         if (headers_sent) {
-            logMessage("Cannot modify header information - headers already sent");
-            return;
+            throw "Cannot modify header information - headers already sent";
+        }
+
+        if (0 != responseCode) {
+            setReturnCode(responseCode);
         }
         headers.insert(std::make_pair(h, v));
     }
 
     static void flush() {
-        for (const auto& [h, v] : headers) {
-            printf("%s: %s\r\n", h.c_str(), v.c_str());
+        if (headers.size() > 0) {
+            for (auto it = headers.begin(); it != headers.end(); it++) {
+                printf("%s: %s\r\n", it->first.c_str(), it->second.c_str());
+            }
+            printf("\r\n"); // end of headers
+            headers.clear();
         }
-        printf("\r\n"); // end of headers
-        headers.clear();
         headers_sent = true;
     }
 };
