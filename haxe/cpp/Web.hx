@@ -48,6 +48,7 @@ package cpp;
  **/
 @:buildXml("
     <files id='__lib__'>
+        <compilerflag value='-std=c++17' />
         <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp' />
      </files>
 ")

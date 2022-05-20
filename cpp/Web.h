@@ -73,6 +73,7 @@
 // PUBLIC CLASS (PART OF THE INTERFACE WITH HAXE)
 //
 
+static bool headers_sent = false;
 static std::unordered_map<std::string, std::string> headers;
 
 class Web {
@@ -159,6 +160,10 @@ public:
     }
 
     static void setHeader(::String h, ::String v) {
+        if (headers_sent) {
+            logMessage("Cannot modify header information - headers already sent");
+            return;
+        }
         headers.insert(std::make_pair(h, v));
     }
 
@@ -166,7 +171,9 @@ public:
         for (const auto& [h, v] : headers) {
             printf("%s: %s\r\n", h.c_str(), v.c_str());
         }
+        printf("\r\n"); // end of headers
         headers.clear();
+        headers_sent = true;
     }
 };
 

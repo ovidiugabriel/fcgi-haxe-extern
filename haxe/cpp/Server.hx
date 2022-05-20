@@ -73,7 +73,11 @@ class Server {
         if (v == null) {
             return false;
         }
-        Sys.print(processRequest(StringTools.urlDecode(v), ctx));
+
+        var output = processRequest(StringTools.urlDecode(v), ctx);
+
+        Web.flush();
+        Sys.print(output);
         return true;
     }
 
@@ -120,6 +124,10 @@ class Server {
 
      **/
     static public function main() {
+        haxe.Log.trace = function(v : String, ?infos : haxe.PosInfos) {
+            Logging.info(v);
+        };
+
         var pathInfo : String = getClassName();
 
         if (null == pathInfo) {
@@ -148,14 +156,10 @@ class Server {
                 Web.setHeader(key, defaultHeaders[key]);
             }
 
-            // End of CGI header
-            Sys.print("\r\n");
-
             var ctx = new Context();
             ctx.addObject(pathInfo, instance);
 
             handleRequest(ctx);
-            Web.flush();
         } else {
             Logging.info('ERROR: instance for "$pathInfo" is null');
             Server.notFound(true);
