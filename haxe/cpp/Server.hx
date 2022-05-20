@@ -109,6 +109,13 @@ class Server {
         }
     }
 
+    static private function internalServerError(?isFinal:Bool) {
+        Web.setReturnCode(500);
+        if (isFinal) {
+            Sys.print("\r\n");
+        }
+    }
+
     /**
 
      **/
