@@ -128,6 +128,7 @@ class Server {
             return;
         }
 
+        // FIXME: Is this really needed?
         var defaultHeaders = [
             "Access-Control-Allow-Origin" => "*",
             "Content-Type"                => "text/html",
@@ -145,7 +146,6 @@ class Server {
 
             for (key in defaultHeaders.keys()) {
                 Web.setHeader(key, defaultHeaders[key]);
-                // FIXME add a way to alter headers after their first set
             }
 
             // End of CGI header
@@ -155,6 +155,7 @@ class Server {
             ctx.addObject(pathInfo, instance);
 
             handleRequest(ctx);
+            Web.flush();
         } else {
             Logging.info('ERROR: instance for "$pathInfo" is null');
             Server.notFound(true);

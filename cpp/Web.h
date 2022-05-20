@@ -51,7 +51,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <sstream>
 
@@ -73,10 +73,11 @@
 // PUBLIC CLASS (PART OF THE INTERFACE WITH HAXE)
 //
 
+static std::unordered_map<std::string, std::string> headers;
+
 class Web {
 public:
     static hx::ObjectPtr<haxe::ds::StringMap_obj> getParams() {
-        // TRACE( __FUNCTION__ );
         hx::ObjectPtr<haxe::ds::StringMap_obj> params = new haxe::ds::StringMap_obj();
 
         Request request;
@@ -154,11 +155,18 @@ public:
         // FastCGI is using 'Status: 404 Not Found' instead of 'HTTP/1.0 404 Not Found'
         // that you may know from PHP
         //
-        printf("Status: %s\r\n", code.c_str());
+        setHeader("Status", code.c_str());
     }
 
     static void setHeader(::String h, ::String v) {
-        printf("%s: %s\r\n", h.c_str(), v.c_str());
+        headers.insert(std::make_pair(h, v));
+    }
+
+    static void flush() {
+        for (const auto& [h, v] : headers) {
+            printf("%s: %s\r\n", h.c_str(), v.c_str());
+        }
+        headers.clear();
     }
 };
 
