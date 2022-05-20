@@ -54,7 +54,9 @@ import Dialog;
         <compilerflag value='-I${FCGI_HAXE_EXTERN_PATH}/cpp' />
      </files>
 ")
+@:final
 class Server {
+
     static public function processRequest( requestData : String, ctx : Context ) : String {
         var u = new haxe.Unserializer(requestData);
         var path : Array<String> = u.unserialize();
@@ -74,11 +76,32 @@ class Server {
             return false;
         }
 
-        var output = processRequest(StringTools.urlDecode(v), ctx);
-
-        Web.flush();
-        Sys.print(output);
+        try {
+            var output = processRequest(StringTools.urlDecode(v), ctx);
+            Web.flush(); // flush the headers
+            Sys.print(output);
+        } catch(ex : Dynamic) {
+            internalServerError();
+            trace(ex);
+            // TODO: print exception stack ...
+            // TODO: add exception handler ...
+            return false;
+        }
         return true;
+    }
+
+    /**
+        Sets the default exception handler if an exception is not caught within a try/catch block.
+     **/
+    static public function setExceptionHandler() {
+        // push
+    }
+
+    /**
+        Restores the previously defined exception handler function
+     **/
+    static public function restoreExceptionHandler() {
+        // pop
     }
 
     static public function getPathInfo() : String {
@@ -100,24 +123,19 @@ class Server {
             var u = new haxe.Unserializer(StringTools.urlDecode(v));
             var path = u.unserialize();
             return path[0];
-        } catch (e : Dynamic) {
+        } catch (ex : Dynamic) {
+            trace(ex);
             Logging.info('ERROR: Could not unserialize parameter __x');
         }
         return null;
     }
 
-    static private function notFound(?isFinal:Bool) {
+    static private function notFound() {
         Web.setReturnCode(404);
-        if (isFinal) {
-            Sys.print("\r\n");
-        }
     }
 
-    static private function internalServerError(?isFinal:Bool) {
+    static private function internalServerError() {
         Web.setReturnCode(500);
-        if (isFinal) {
-            Sys.print("\r\n");
-        }
     }
 
     /**
@@ -132,7 +150,7 @@ class Server {
 
         if (null == pathInfo) {
             Logging.info("ERROR: Invalid request. No class name specified.");
-            Server.notFound(true);
+            Server.notFound();
             return;
         }
 
@@ -162,7 +180,7 @@ class Server {
             handleRequest(ctx);
         } else {
             Logging.info('ERROR: instance for "$pathInfo" is null');
-            Server.notFound(true);
+            Server.notFound();
         }
     }
 }

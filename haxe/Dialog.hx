@@ -7,14 +7,7 @@
 import haxe.ds.StringMap;
 
 #if cpp
-// Select usage of a C++17 compiler
-/*
-@:buildXml("
-    <files id='haxe'>
-        <compilerflag value='-std=c++17' />
-     </files>
-")
-*/
+//@:buildXml("")
 // @:headerCode('#include "TDialog.h"')
 #end
 class Dialog {
