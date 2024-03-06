@@ -10,9 +10,9 @@
 # Build the server
 #
 
-export FCGI_HAXE_EXTERN_PATH=`cygpath -w $PWD`
+export FCGI_HAXE_EXTERN_PATH=`pwd`
 export HXCPP_MINGW=1
-# export MINGW_ROOT="/cygdrive/c/Qt/Tools/mingw530_32"
+export MINGW_ROOT=/c/msys64/mingw64
 
 # Cleanup old server files
 if [ "1" == "$CLEAN" ] ; then
@@ -20,7 +20,18 @@ if [ "1" == "$CLEAN" ] ; then
 fi
 
 cd haxe
-haxe build.hxml
+
+# Build default is 64-bit but if HXCPP_M32=1 is specified we switch to
+# 32-bit build
+
+if [ "1" == "$HXCPP_M32" ] ; then
+    echo "Not implemented yet"
+    exit 1
+    #haxe --debug build32.hxml
+else
+    haxe --debug build64.hxml
+fi
+
 if [ "$?" != "0" ] ; then
     exit 1
 fi
@@ -43,19 +54,24 @@ cd ..
 
 XAMPP_PATH=$(cygpath "C:\xampp")
 CGI_BIN_PATH=$XAMPP_PATH/cgi-bin
-CGI_SERVER_EXE=$CGI_BIN_PATH/Server.exe
+CGI_SERVER_EXE=$CGI_BIN_PATH/Server-debug.exe
+
+# FIXME: strip: Server.exe: file format not recognized
+# That's why we use debug
 
 if [ -e $CGI_SERVER_EXE ] ; then
     rm $CGI_SERVER_EXE
 fi
 
-SERVER=$PWD/Server/Server.exe
+SERVER=$PWD/Server/Server-debug.exe
 if [ -e $SERVER ] ; then
+    ls -al $SERVER
+
     cp $SERVER                        $CGI_BIN_PATH
 
     # TODO: detect dependencies
     # copy dependencies
-    cp $PWD/Server/libgcc_s_dw2-1.dll $CGI_BIN_PATH
+    #cp $PWD/Server/libgcc_s_dw2-1.dll $CGI_BIN_PATH
     cp $PWD/Server/libstdc++-6.dll    $CGI_BIN_PATH
 else
     echo "Server $SERVER not built"
